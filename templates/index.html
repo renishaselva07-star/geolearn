@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101c2c">
+  <title>GeoLearn — Explore the world</title>
+  <style>
+    :root {
+      --ink: #142235;
+      --muted: #718096;
+      --paper: #f5f7f3;
+      --panel: rgba(255,255,255,.88);
+      --line: #e5eae4;
+      --green: #1b725c;
+      --green-dark: #155643;
+      --mint: #dff3e9;
+      --blue: #dceafa;
+      --shadow: 0 24px 70px rgba(19, 42, 53, .12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(184, 224, 204, .42), transparent 30rem),
+        radial-gradient(circle at 95% 85%, rgba(191, 216, 243, .48), transparent 28rem),
+        var(--paper);
+      display: grid; place-items: center; padding: 28px;
+    }
+    .app { width: min(1120px, 100%); min-height: min(760px, calc(100vh - 56px)); display: grid; grid-template-columns: 320px 1fr; overflow: hidden; border: 1px solid rgba(255,255,255,.8); border-radius: 28px; background: var(--panel); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    aside { position: relative; padding: 32px 26px; color: #f5fbf7; background: linear-gradient(155deg, #142b3b 0%, #174c4a 58%, #1c725b 100%); display: flex; flex-direction: column; overflow: hidden; }
+    aside::before, aside::after { content: ""; position: absolute; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; width: 360px; height: 360px; right: -220px; top: 110px; box-shadow: 0 0 0 28px rgba(255,255,255,.025), 0 0 0 58px rgba(255,255,255,.02); }
+    aside::after { width: 210px; height: 210px; top: auto; right: auto; left: -145px; bottom: -95px; }
+    .brand, .side-content, .side-bottom { position: relative; z-index: 1; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: -.04em; font-size: 20px; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 14px; background: rgba(255,255,255,.12); }
+    .brand-mark svg { width: 25px; }
+    .eyebrow { margin: 64px 0 14px; color: #a9d9c5; font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 0; max-width: 260px; font-size: clamp(32px, 3.2vw, 43px); line-height: 1.04; letter-spacing: -.055em; }
+    .intro { margin: 18px 0 0; color: #c6ddd6; font-size: 14px; line-height: 1.75; }
+    .globe-art { margin: 38px auto 28px; width: 190px; max-width: 100%; opacity: .95; }
+    .topic-label { color: #a9d9c5; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 12px; }
+    .topics { display: flex; flex-wrap: wrap; gap: 8px; }
+    .topic { border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 8px 11px; color: #e4f4ec; background: rgba(255,255,255,.07); font-size: 11px; }
+    .side-bottom { margin-top: auto; padding-top: 28px; color: #a9c9c0; font-size: 11px; display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 7px; height: 7px; background: #8fe0b5; border-radius: 50%; box-shadow: 0 0 0 4px rgba(143,224,181,.13); }
+    main { min-width: 0; display: flex; flex-direction: column; min-height: 700px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 26px 32px; border-bottom: 1px solid var(--line); }
+    .top-title { font-size: 14px; font-weight: 750; }
+    .top-sub { margin-top: 4px; font-size: 11px; color: var(--muted); }
+    .badge { padding: 8px 11px; border-radius: 999px; color: var(--green); background: #e8f5ee; font-size: 11px; font-weight: 750; }
+    .chat { flex: 1; min-height: 0; overflow-y: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
+    .welcome { padding: 22px; border: 1px solid #e5eee7; border-radius: 20px; background: linear-gradient(135deg, #f5fbf7, #f4f8fc); }
+    .welcome-kicker { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .welcome h2 { margin: 10px 0 8px; font-size: 23px; letter-spacing: -.04em; }
+    .welcome p { margin: 0; color: #647487; font-size: 13px; line-height: 1.65; }
+    .suggestions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-top: 18px; }
+    .suggestion { text-align: left; border: 1px solid #dfe9e2; background: rgba(255,255,255,.8); border-radius: 13px; padding: 12px 13px; color: #294254; cursor: pointer; font: inherit; font-size: 12px; transition: .18s ease; }
+    .suggestion:hover { border-color: #8fc5aa; transform: translateY(-1px); }
+    .message { display: flex; gap: 11px; align-items: flex-start; max-width: 88%; animation: rise .22s ease-out; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .avatar { flex: 0 0 32px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 11px; color: var(--green); background: var(--mint); font-size: 12px; font-weight: 800; }
+    .user .avatar { color: #315a83; background: var(--blue); }
+    .bubble { padding: 13px 15px; border: 1px solid var(--line); border-radius: 4px 16px 16px 16px; background: white; color: #34465a; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .user .bubble { border-color: #d8e8f8; border-radius: 16px 4px 16px 16px; background: #eaf3fc; color: #233c56; }
+    .composer-wrap { padding: 18px 32px 24px; border-top: 1px solid var(--line); }
+    .composer { display: flex; align-items: flex-end; gap: 10px; padding: 9px; border: 1px solid #dce5df; border-radius: 18px; background: #fff; box-shadow: 0 5px 20px rgba(30,60,50,.04); transition: border-color .2s; }
+    .composer:focus-within { border-color: #78b99b; }
+    textarea { flex: 1; resize: none; border: 0; outline: 0; background: transparent; padding: 9px 8px; min-height: 42px; max-height: 140px; color: var(--ink); font: inherit; font-size: 13px; line-height: 1.5; }
+    textarea::placeholder { color: #9aa7b2; }
+    .send { flex: 0 0 42px; width: 42px; height: 42px; border: 0; border-radius: 13px; display: grid; place-items: center; color: white; background: var(--green); cursor: pointer; transition: .18s; }
+    .send:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .send:disabled { opacity: .45; cursor: wait; transform: none; }
+    .send svg { width: 18px; }
+    .hint { margin: 10px 4px 0; color: #98a3ad; font-size: 10px; text-align: center; }
+    .typing { display: inline-flex; gap: 4px; padding: 4px 0; }
+    .typing i { width: 5px; height: 5px; border-radius: 50%; background: #80a895; animation: pulse 1s infinite ease-in-out; }
+    .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+    @keyframes pulse { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) {
+      body { padding: 0; display: block; }
+      .app { width: 100%; min-height: 100vh; border-radius: 0; grid-template-columns: 1fr; }
+      aside { padding: 20px 22px; min-height: auto; }
+      .eyebrow { margin-top: 28px; }
+      h1 { max-width: 500px; font-size: 32px; }
+      .intro { max-width: 500px; margin-top: 10px; }
+      .globe-art { display: none; }
+      .topic-label, .topics, .side-bottom { display: none; }
+      main { min-height: 65vh; }
+      .topbar { padding: 18px 20px; }
+      .chat { padding: 20px; }
+      .composer-wrap { padding: 14px 20px 20px; }
+      .message { max-width: 96%; }
+    }
+    @media (max-width: 420px) { .suggestions { grid-template-columns: 1fr; } .badge { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 16h22.4M16 4c3.5 3.3 5.2 7.3 5.2 12S19.5 24.7 16 28M16 4c-3.5 3.3-5.2 7.3-5.2 12S12.5 24.7 16 28M7.7 8.3c5.4 2.8 11.2 2.8 16.6 0M7.7 23.7c5.4-2.8 11.2-2.8 16.6 0" stroke="currentColor" stroke-width="1.2"/></svg>
+        </div>
+        GeoLearn
+      </div>
+      <div class="side-content">
+        <p class="eyebrow">Your world, understood</p>
+        <h1>Curiosity has no borders.</h1>
+        <p class="intro">Explore Earth's places, people, landscapes, and the forces that shape our planet — one question at a time.</p>
+        <svg class="globe-art" viewBox="0 0 220 220" fill="none" aria-hidden="true">
+          <circle cx="110" cy="110" r="91" stroke="#B8E7D1" stroke-opacity=".55"/>
+          <circle cx="110" cy="110" r="68" stroke="#B8E7D1" stroke-opacity=".4"/>
+          <ellipse cx="110" cy="110" rx="34" ry="91" stroke="#B8E7D1" stroke-opacity=".45"/>
+          <ellipse cx="110" cy="110" rx="72" ry="30" transform="rotate(-28 110 110)" stroke="#B8E7D1" stroke-opacity=".45"/>
+          <path d="M43 85l22-17 18 5 8 17-10 13 7 17-17 20-13-7-7-22-12-9 4-17zm79-42 19 10 2 17-15 10-9-13 3-24zm23 69 21-7 18 13-9 20-17 2-13-13zM99 143l20-7 15 15-8 25-16 5-15-17 4-21z" fill="#8FD2B3" fill-opacity=".75"/>
+          <circle cx="110" cy="110" r="91" stroke="#DDF7E9" stroke-width="1.5"/>
+        </svg>
+        <div class="topic-label">Explore a topic</div>
+        <div class="topics"><span class="topic">Physical geography</span><span class="topic">Climate</span><span class="topic">Countries</span><span class="topic">Maps</span><span class="topic">Human geography</span></div>
+      </div>
+      <div class="side-bottom"><span class="status-dot"></span> A focused space for geography learning</div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div><div class="top-title">Geography learning assistant</div><div class="top-sub">Ask. Discover. Understand.</div></div>
+        <span class="badge">● Geo-focused AI</span>
+      </header>
+      <section class="chat" id="chat" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <div class="welcome-kicker">Welcome to GeoLearn</div>
+          <h2>Where shall we begin?</h2>
+          <p>Ask a geography question, get a clear explanation, and build your understanding of the world.</p>
+          <div class="suggestions">
+            <button class="suggestion" data-question="Why do tectonic plates move?">🌋 Why do tectonic plates move?</button>
+            <button class="suggestion" data-question="How are monsoons formed?">🌧 How are monsoons formed?</button>
+            <button class="suggestion" data-question="What is the difference between weather and climate?">☁️ Weather vs. climate</button>
+            <button class="suggestion" data-question="Explain latitude and longitude with examples.">🧭 Latitude and longitude</button>
+          </div>
+        </div>
+      </section>
+      <div class="composer-wrap">
+        <form class="composer" id="chat-form">
+          <textarea id="message" rows="1" maxlength="6000" placeholder="Ask GeoLearn a geography question..." aria-label="Your geography question"></textarea>
+          <button class="send" id="send" type="submit" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4l-5 16-3.5-6.5L4 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M11.5 13.5L20 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </form>
+        <div class="hint">GeoLearn focuses on geography and geography-related study questions.</div>
+      </div>
+    </main>
+  </div>
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message");
+    const send = document.getElementById("send");
+    const welcome = document.getElementById("welcome");
+
+    function addMessage(text, role) {
+      const row = document.createElement("div");
+      row.className = `message ${role}`;
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = role === "user" ? "You" : "G";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+      row.append(avatar, bubble);
+      chat.appendChild(row);
+      chat.scrollTop = chat.scrollHeight;
+      return row;
+    }
+
+    function showTyping() {
+      const row = document.createElement("div");
+      row.className = "message";
+      row.id = "typing";
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = "G";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = '<span class="typing" aria-label="GeoLearn is thinking"><i></i><i></i><i></i></span>';
+      row.append(avatar, bubble);
+      chat.appendChild(row);
+      chat.scrollTop = chat.scrollHeight;
+      return row;
+    }
+
+    async function sendMessage(text) {
+      const message = text.trim();
+      if (!message || send.disabled) return;
+      welcome?.remove();
+      addMessage(message, "user");
+      input.value = "";
+      input.style.height = "auto";
+      send.disabled = true;
+      const typing = showTyping();
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        typing.remove();
+        if (!response.ok) throw new Error(data.error || "Something went wrong.");
+        addMessage(data.reply, "assistant");
+      } catch (error) {
+        typing.remove();
+        addMessage(error.message || "Connection error. Please try again.", "assistant");
+      } finally {
+        send.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+
+    input.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = `${Math.min(input.scrollHeight, 140)}px`;
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    document.querySelectorAll("[data-question]").forEach(button => {
+      button.addEventListener("click", () => sendMessage(button.dataset.question));
+    });
+  </script>
+</body>
+</html>
